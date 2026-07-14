@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/circuitgrid.tsx","./src/components/controlbar.tsx","./src/components/gatepanel.tsx","./src/components/historylog.tsx","./src/components/probabilitychart.tsx","./src/components/vortexcanvas.tsx","./src/lib/api.ts","./src/lib/types.ts","./src/lib/utils.ts"],"version":"5.9.3"}

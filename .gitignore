@@ -23,3 +23,10 @@ Thumbs.db
 *.exe
 *.dll
 *.pdb
+
+# Frontend build
+dist/
+
+# Executables
+*.exe
+*.cjs

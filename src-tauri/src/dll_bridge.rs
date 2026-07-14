@@ -17,15 +17,15 @@ use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use std::os::raw::{c_char, c_int, c_uint};
 
-/// HMAC 共享密钥 (编译时植入, 防止运行时明文暴露)
-/// 优先读环境变量 QSIM_HMAC_SECRET, 缺省用编译时默认值
+/// HMAC shared secret (compiled in, prevents runtime plaintext exposure)
+/// Reads from env var QSIM_HMAC_SECRET, falls back to default placeholder
 const HMAC_SECRET: &str = match option_env!("QSIM_HMAC_SECRET") {
     Some(s) => s,
-    None => "QSIM-V12.784-DEFAULT-HMAC-SECRET-CHANGE-ME",
+    None => "DEFAULT-HMAC-SECRET-CHANGE-ME",
 };
 
-/// 客户端版本 (用于 license 版本检查)
-const CLIENT_VERSION: &str = "V12.784";
+/// Client version (for license version check)
+const CLIENT_VERSION: &str = "0.78.0";
 
 // ============================================================================
 // §1 DTO 类型 (Tauri 命令参数/返回值, 跨 FFI 序列化)
