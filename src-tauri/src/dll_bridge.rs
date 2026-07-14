@@ -3,7 +3,7 @@
 //! 封装所有 FFI 调用, 对上层命令提供安全 Rust 接口.
 //! 引擎缺失时返回 Err (GUI 无法启动).
 //!
-//! ## 设计原则 (V12.784 修正)
+//! ## 设计原则
 //! - GUI 必须主动调用 security_init + license_auto_verify_start, 否则 DLL 内
 //!   宽限期 / 反调试 / 完整性校验 / watermark 等全部为死代码
 //! - GUI 仍不含 license 业务逻辑 (验证在引擎内部), 但负责"按下启动按钮"
@@ -18,14 +18,14 @@ use std::ffi::CString;
 use std::os::raw::{c_char, c_int, c_uint};
 
 /// HMAC shared secret (compiled in, prevents runtime plaintext exposure)
-/// Reads from env var QSIM_HMAC_SECRET, falls back to default placeholder
+/// Reads from env var QSIM_HMAC_SECRET, falls back to empty string
 const HMAC_SECRET: &str = match option_env!("QSIM_HMAC_SECRET") {
     Some(s) => s,
-    None => "DEFAULT-HMAC-SECRET-CHANGE-ME",
+    None => "",
 };
 
 /// Client version (for license version check)
-const CLIENT_VERSION: &str = "0.78.0";
+const CLIENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // ============================================================================
 // §1 DTO 类型 (Tauri 命令参数/返回值, 跨 FFI 序列化)
@@ -118,7 +118,7 @@ pub struct QuantumDll {
     vortex_build_from_sparse: Symbol<'static, unsafe extern "C" fn(QsimVortexHandle, QsimSparseHandle, usize) -> c_int>,
     vortex_build_from_mps: Symbol<'static, unsafe extern "C" fn(QsimVortexHandle, QsimMpsHandle, usize) -> c_int>,
     vortex_render: Symbol<'static, unsafe extern "C" fn(QsimVortexHandle, usize, usize, c_int, f64, *mut u8, usize) -> c_int>,
-    // §3.2 Security & License (V12.784: 必须主动启动, 否则 DLL 内安全机制全为死代码)
+    // §3.2 Security & License (必须主动启动, 否则 DLL 内安全机制全为死代码)
     security_init: Symbol<'static, unsafe extern "C" fn() -> c_int>,
     security_tick: Symbol<'static, unsafe extern "C" fn() -> c_int>,
     security_threat_score: Symbol<'static, unsafe extern "C" fn() -> u32>,
@@ -205,7 +205,7 @@ impl QuantumDll {
             vortex_build_from_mps: sym_fn!(b"qsim_vortex_field_build_from_mps\0", unsafe extern "C" fn(QsimVortexHandle, QsimMpsHandle, usize) -> c_int),
             vortex_render: sym_fn!(b"qsim_vortex_render\0", unsafe extern "C" fn(QsimVortexHandle, usize, usize, c_int, f64, *mut u8, usize) -> c_int),
 
-            // §3.2 Security & License (V12.784: 闭合宽限期失效缺口)
+            // §3.2 Security & License (闭合宽限期失效缺口)
             security_init: sym_fn!(b"qsim_security_init\0", unsafe extern "C" fn() -> c_int),
             security_tick: sym_fn!(b"qsim_security_tick\0", unsafe extern "C" fn() -> c_int),
             security_threat_score: sym_fn!(b"qsim_security_threat_score\0", unsafe extern "C" fn() -> u32),
@@ -217,10 +217,10 @@ impl QuantumDll {
         })
     }
 
-    /// V12.784: 启动安全上下文 + 后台 license 自动验证线程
+    /// 启动安全上下文 + 后台 license 自动验证线程
     ///
     /// 必须在 `app.manage(dll)` 之前调用, 否则 DLL 内所有安全机制为死代码:
-    /// - security_init: 创建 SecurityContext (迈斯纳盾 + Anderson-Higgs + 反 dump)
+    /// - security_init: create SecurityContext (anti-debug + integrity check + anti-dump)
     /// - license_auto_verify_start: 启动 6 小时周期后台验证线程
     /// - license_check_version: 首次版本检查 (触发宽限期令牌缓存)
     ///
@@ -246,23 +246,23 @@ impl QuantumDll {
         (security_ok, status, days)
     }
 
-    /// V12.784: 周期性安全检测 (供前端定时调用, 每 64 步反调试)
+    /// 周期性安全检测 (供前端定时调用, 每 64 步反调试)
     pub fn security_tick(&self) -> i32 {
         unsafe { (self.security_tick)() }
     }
 
-    /// V12.784: 当前威胁评分 (0=安全, ≥100=应退出)
+    /// 当前威胁评分 (0=安全, ≥100=应退出)
     pub fn security_threat_score(&self) -> u32 {
         unsafe { (self.security_threat_score)() }
     }
 
-    /// V12.784: license 状态码 (0=有效, 1=宽限期, 2=过期, 3=无效)
+    /// license 状态码 (0=有效, 1=宽限期, 2=过期, 3=无效)
     pub fn license_status_code(&self) -> i32 {
         let raw = unsafe { (self.license_status)() };
         raw as i32
     }
 
-    /// V12.784: 剩余宽限期天数
+    /// 剩余宽限期天数
     pub fn license_days(&self) -> u32 {
         unsafe { (self.license_remaining_days)() }
     }
@@ -280,7 +280,7 @@ impl QuantumDll {
         if vortex_handle.is_null() {
             return RunResultDto {
                 probabilities: probs, measured, vortex_handle: 0, elapsed_us: 0,
-                error: Some("涡旋场创建失败".to_string()),
+                error: Some("Vortex场创建失败".to_string()),
             };
         }
 
@@ -416,7 +416,7 @@ impl QuantumDll {
     }
 
     // ========================================================================
-    // §5 涡旋操作
+    // §5 Vortex操作
     // ========================================================================
 
     pub fn vortex_new(&self) -> QsimVortexHandle { unsafe { (self.vortex_new)() } }

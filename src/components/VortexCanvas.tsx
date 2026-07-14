@@ -90,7 +90,7 @@ export function VortexCanvas({
       <div className="flex items-center gap-3 mb-2">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <span className="w-1 h-4 rounded-full bg-gradient-to-b from-violet-400 to-pink-500" />
-          涡旋场渲染
+          Vortex场渲染
         </h3>
         <div className="flex items-center gap-2 text-xs">
           <span className="px-2 py-0.5 rounded bg-violet-500/30 text-violet-200 font-mono">核: {vortexCount}</span>
@@ -124,7 +124,7 @@ export function VortexCanvas({
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center">
               <span className="text-3xl">Ψ</span>
             </div>
-            <p className="text-sm">搭建电路后点击 <span className="text-emerald-400 font-semibold">▶ 运行此电路</span> 显示涡旋场</p>
+            <p className="text-sm">搭建电路后点击 <span className="text-emerald-400 font-semibold">▶ 运行此电路</span> 显示Vortex场</p>
           </div>
         )}
       </div>

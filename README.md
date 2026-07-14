@@ -64,7 +64,7 @@ npm run tauri build -- --no-bundle
 ## Architecture
 
 ```
-cauchy-gui/
+quantumsim-gui/
 ├── src/                    # Frontend (React + TypeScript)
 │   ├── components/         # UI components
 │   ├── App.tsx             # Main app

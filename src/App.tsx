@@ -160,7 +160,7 @@ export default function App() {
       const chg = await vortexCharge(result.vortex_handle);
       setVortexCnt(cnt);
       setVortexChg(chg);
-      addHistory(`完成: ${result.elapsed_us}μs, 测量=${result.measured}, 涡旋核=${cnt}, 荷=${chg}`);
+      addHistory(`完成: ${result.elapsed_us}μs, 测量=${result.measured}, Vortex核=${cnt}, 荷=${chg}`);
     } catch (e) {
       addHistory(`运行失败: ${e}`);
     }
@@ -280,7 +280,7 @@ export default function App() {
             onRun={onRun}
           />
         </div>
-        {/* 中栏: 涡旋 */}
+        {/* 中栏: Vortex */}
         <div className="flex-1 min-w-0">
           <VortexCanvas
             handle={vortexHandle}

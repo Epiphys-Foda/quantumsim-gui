@@ -1,6 +1,6 @@
 //! GUI 后端命令定义
 //!
-//! V12.784: GUI 在启动时主动调用 security_init + license_auto_verify_start,
+//! GUI 在启动时主动调用 security_init + license_auto_verify_start,
 //! 闭合"宽限期完全失效"缺口. 安全业务逻辑仍在引擎内部, GUI 只负责"按下启动按钮".
 
 mod dll_bridge;
@@ -15,7 +15,7 @@ use tauri::{Manager, State};
 // §1 命令
 // ============================================================================
 
-/// V12.784: license / 安全状态返回结构
+/// license / 安全状态返回结构
 #[derive(Serialize, Clone, Debug)]
 pub struct SecurityStatusDto {
     /// 安全上下文是否成功初始化
@@ -38,7 +38,7 @@ fn security_status(state: State<QuantumDll>) -> SecurityStatusDto {
     }
 }
 
-/// V12.784: 前端定时调用 (建议每 5 秒), 触发引擎内反调试 + canary 校验
+/// 前端定时调用 (建议每 5 秒), 触发引擎内反调试 + canary 校验
 #[tauri::command]
 fn security_tick(state: State<QuantumDll>) -> i32 {
     state.security_tick()
@@ -198,7 +198,7 @@ pub fn run() {
         .setup(|app| {
             match QuantumDll::load() {
                 Ok(dll) => {
-                    // V12.784: 启动安全上下文 + 后台 license 自动验证
+                    // 启动安全上下文 + 后台 license 自动验证
                     // 必须在 app.manage 之前调用, 否则宽限期/反调试/watermark 全失效
                     let (sec_ok, lic_status, days) = dll.start_security_and_license();
                     if sec_ok {
@@ -237,7 +237,7 @@ pub fn run() {
             vortex_clear,
             export_circuit,
             import_circuit,
-            // V12.784: 安全状态查询 + 周期性反调试
+            // 安全状态查询 + 周期性反调试
             security_status,
             security_tick,
         ])
