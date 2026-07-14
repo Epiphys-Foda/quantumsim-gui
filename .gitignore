@@ -1,0 +1,25 @@
+# Rust 编译产物
+target/
+**/target/
+*.d
+
+# Node.js
+node_modules/
+dist/
+
+# 环境变量
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 编译产物
+*.exe
+*.dll
+*.pdb

@@ -1,0 +1,28 @@
+[package]
+name = "quantumsim-gui"
+version = "0.1.0"
+description = "量子计算平台 GUI 客户端 — 开源, 通过 FFI 调用闭源核心引擎"
+authors = ["Quantum Lab"]
+license = "Apache-2.0"
+edition = "2021"
+rust-version = "1.96"
+
+[lib]
+name = "quantumsim_gui_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libloading = "0.8"
+rfd = "0.15"
+
+[profile.release]
+opt-level = 3
+# 开源友好配置: 不加 strip / lto / panic=abort / codegen-units=1
+# GUI 本身开源, 无需防逆向保护
